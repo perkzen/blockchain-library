@@ -55,20 +55,29 @@ contract Library {
         _;
     }
 
+    event BookAdded(string ISBN, string author, string title);
+    event BookBorrowed(string ISBN, address addr);
+    event BookReturned(string ISBN, address addr);
+    event BookRenewed(string ISBN, address addr);
+
+
     function addBook(Book memory _b) public isOwner {
         books.push(_b);
         ISBNToBookId[_b.ISBN] = bookCount;
         titleToBookId[_b.title].push(bookCount);
         authorToBookId[_b.author].push(bookCount);
         bookCount++;
+        emit BookAdded(_b.ISBN, _b.author, _b.title);
     }
 
     function borrowBook(string memory _ISBN) public isNotBorrowed(_ISBN) {
         borrowedBooks[_ISBN] = Borrow(msg.sender, 0, block.timestamp + 3 weeks);
+        emit BookBorrowed(_ISBN, msg.sender);
     }
 
     function returnBook(string memory _ISBN) public hasBook(_ISBN) {
         delete borrowedBooks[_ISBN];
+        emit BookReturned(_ISBN, msg.sender);
     }
 
     function findAvailableBooksByTitle(string memory _title) public view returns (Book[] memory) {
@@ -98,6 +107,7 @@ contract Library {
         require(borrowedBooks[_ISBN].numOfRenews < 3, "You have already renewed this book 3 times");
         borrowedBooks[_ISBN].returnDate += 3 days;
         borrowedBooks[_ISBN].numOfRenews++;
+        emit BookRenewed(_ISBN, msg.sender);
     }
 
 }
