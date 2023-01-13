@@ -21,7 +21,7 @@ contract Library {
     }
 
     Book[] public books;
-    uint public bookCount = 0;
+    uint bookCount = 0;
 
     // ISBN => bookId
     mapping(string => uint) ISBNToBookId;
