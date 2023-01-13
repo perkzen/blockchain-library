@@ -144,9 +144,9 @@ describe('Library smart contract', () => {
     });
     it('Should return a book by author', async () => {
       const res = await library.findBookByAuthor(book.author);
-      expect(res.ISBN).to.equal(book.ISBN);
-      expect(res.title).to.equal(book.title);
-      expect(res.author).to.equal(book.author);
+      expect(res[0].ISBN).to.equal(book.ISBN);
+      expect(res[0].title).to.equal(book.title);
+      expect(res[0].author).to.equal(book.author);
     });
   });
   describe('extendBorrow', () => {

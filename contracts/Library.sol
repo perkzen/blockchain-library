@@ -21,7 +21,7 @@ contract Library {
     }
 
     Book[] public books;
-    uint bookCount = 0;
+    uint public bookCount = 0;
 
     // ISBN => bookId
     mapping(string => uint) ISBNToBookId;
@@ -95,8 +95,13 @@ contract Library {
         return books[ISBNToBookId[_ISBN]];
     }
 
-    function findBookByAuthor(string memory _author) public view returns (Book memory) {
-        return books[authorToBookId[_author][0]];
+    function findBookByAuthor(string memory _author) public view returns (Book[] memory) {
+        uint[] memory bookIds = authorToBookId[_author];
+        Book[] memory result = new Book[](bookIds.length);
+        for (uint i = 0; i < bookIds.length; i++) {
+            result[i] = books[bookIds[i]];
+        }
+        return result;
     }
 
     function findBookByTitle(string memory _title) public view returns (Book memory) {
