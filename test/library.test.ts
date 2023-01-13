@@ -1,4 +1,5 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { Library } from '../typechain-types';
@@ -17,6 +18,8 @@ describe('Library smart contract', () => {
     ISBN: 'test1',
   };
 
+  const defaultAddress = '0x0000000000000000000000000000000000000000';
+
   describe('deployment', () => {
     it('Should set the right owner', async () => {
       const { library, owner } = await loadFixture(deployLibraryFixture);
@@ -26,9 +29,11 @@ describe('Library smart contract', () => {
 
   describe('addBook', () => {
     let library: Library;
-
+    let otherAccount: SignerWithAddress;
     before(async () => {
-      library = (await loadFixture(deployLibraryFixture)).library;
+      const contract = await loadFixture(deployLibraryFixture);
+      library = contract.library;
+      otherAccount = contract.otherAccount;
     });
 
     it('Should add a book', async () => {
@@ -40,6 +45,14 @@ describe('Library smart contract', () => {
       expect(res.author).to.equal(book.author);
       expect(res.ISBN).to.equal(book.ISBN);
       expect(numOfBooks).to.equal(1);
+    });
+    it('Should not add a book if not owner', async () => {
+      await expect(
+        otherAccount.sendTransaction({
+          to: library.address,
+          data: library.interface.encodeFunctionData('addBook', [book]),
+        })
+      ).to.be.revertedWith('Only owner can call this function.');
     });
   });
 
@@ -57,17 +70,38 @@ describe('Library smart contract', () => {
     it('Should borrow a book', async () => {
       await library.borrowBook(book.ISBN);
       const res = await library.borrowedBooks(book.ISBN);
-      expect(res).to.equal(address);
+      const d = new Date();
+      d.setDate(d.getDate() + 21);
+
+      expect(res.returnDate.toNumber() * 1000).to.approximately(
+        d.getTime(),
+        1000
+      );
     });
 
     it('Should not borrow a book that is already borrowed', async () => {
-      await library
-        .borrowBook(book.ISBN)
-        .catch((error: Error) =>
-          expect(error.message).to.equal(
-            "VM Exception while processing transaction: reverted with reason string 'This book is already borrowed'"
-          )
-        );
+      expect(library.borrowBook(book.ISBN)).to.be.revertedWith(
+        'Book is already borrowed'
+      );
+    });
+  });
+  describe('returnBook', () => {
+    let library: Library;
+    let address: string;
+
+    before(async () => {
+      const contract = await loadFixture(deployLibraryFixture);
+      library = contract.library;
+      address = contract.owner.address;
+      await library.addBook(book);
+      await library.borrowBook(book.ISBN);
+    });
+
+    it('Should return a book', async () => {
+      await library.returnBook(book.ISBN);
+      const res = await library.borrowedBooks(book.ISBN);
+      expect(res.returnDate.toNumber()).to.equal(0);
+      expect(res.addr).to.equal(defaultAddress);
     });
   });
 });
