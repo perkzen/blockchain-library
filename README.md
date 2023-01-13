@@ -1,13 +1,41 @@
-# Sample Hardhat Project
+# Blockchain Library
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+This projects demonstrates how a library would work on a blockchain.
 
-Try running some of the following tasks:
+### Features
+ - add Book
+ - borrow Book
+ - return Book
+ - list Books
+ - find all available Books by Title
+ - find all  Books by Author
+ - find Book by ISBN
+ - extend Borrowing Period
 
+
+### Run tests
 ```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
+  npx hardhat test
 ```
+
+### Project info
+This project is based on the [Hardhat](https://hardhat.org/) development environment.
+
+### Dependencies
+- Typescript
+- Solidity
+- Chai
+- Hardhat
+
+### Project structure
+```
+.
+└── blockchain_library/
+    ├── contracts/
+    │   └── Library.sol
+    ├── scripts/
+    │   └── deploy.ts
+    └── test/
+        └── library.test.ts
+```
+

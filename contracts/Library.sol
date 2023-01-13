@@ -24,13 +24,13 @@ contract Library {
     uint public bookCount = 0;
 
     // ISBN => bookId
-    mapping(string => uint) public ISBNToBookId;
+    mapping(string => uint) ISBNToBookId;
 
     // title => bookId[]
-    mapping(string => uint[]) public titleToBookId;
+    mapping(string => uint[]) titleToBookId;
 
     // author => bookId[]
-    mapping(string => uint[]) public authorToBookId;
+    mapping(string => uint[])  authorToBookId;
 
     // ISBN => Borrow
     mapping(string => Borrow) public borrowedBooks;
