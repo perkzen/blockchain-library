@@ -104,4 +104,90 @@ describe('Library smart contract', () => {
       expect(res.addr).to.equal(defaultAddress);
     });
   });
+  describe('findAvailableBooksByTitle', () => {
+    let library: Library;
+    before(async () => {
+      const contract = await loadFixture(deployLibraryFixture);
+      library = contract.library;
+      await library.addBook(book);
+    });
+    it('Should return an array of books', async () => {
+      const res = await library.findAvailableBooksByTitle(book.title);
+      expect(res.length).to.equal(1);
+    });
+    it('Should return an empty array if no available books are found', async () => {
+      await library.borrowBook(book.ISBN);
+      const res = await library.findAvailableBooksByTitle(book.title);
+      expect(res[0].ISBN).to.equal('');
+      expect(res[0].title).to.equal('');
+      expect(res[0].author).to.equal('');
+    });
+  });
+  describe('findBookBy...', () => {
+    let library: Library;
+    before(async () => {
+      const contract = await loadFixture(deployLibraryFixture);
+      library = contract.library;
+      await library.addBook(book);
+    });
+    it('Should return a book by ISBN', async () => {
+      const res = await library.findBookByISBN(book.ISBN);
+      expect(res.ISBN).to.equal(book.ISBN);
+      expect(res.title).to.equal(book.title);
+      expect(res.author).to.equal(book.author);
+    });
+    it('Should return a book by title', async () => {
+      const res = await library.findBookByTitle(book.title);
+      expect(res.ISBN).to.equal(book.ISBN);
+      expect(res.title).to.equal(book.title);
+      expect(res.author).to.equal(book.author);
+    });
+    it('Should return a book by author', async () => {
+      const res = await library.findBookByAuthor(book.author);
+      expect(res.ISBN).to.equal(book.ISBN);
+      expect(res.title).to.equal(book.title);
+      expect(res.author).to.equal(book.author);
+    });
+  });
+  describe('extendBorrow', () => {
+    let library: Library;
+    before(async () => {
+      const contract = await loadFixture(deployLibraryFixture);
+      library = contract.library;
+      await library.addBook(book);
+      await library.borrowBook(book.ISBN);
+    });
+    it('Should extend the borrow date', async () => {
+      const borrow = await library.borrowedBooks(book.ISBN);
+      await library.extendBorrow(book.ISBN);
+      const res = await library.borrowedBooks(book.ISBN);
+      expect(res.returnDate.toNumber()).to.be.greaterThan(
+        borrow.returnDate.toNumber()
+      );
+      expect(res.numOfRenews).to.be.greaterThan(borrow.numOfRenews);
+    });
+    it('Should not extend the borrow date if the book is not borrowed', async () => {
+      await library.returnBook(book.ISBN);
+      expect(library.extendBorrow(book.ISBN)).to.be.revertedWith(
+        'Book is not borrowed'
+      );
+    });
+    it('Should not extend the borrow date if you have not borrowed the book', async () => {
+      const book2 = { ...book, ISBN: '1234567890123' };
+      expect(library.extendBorrow(book2.ISBN)).to.be.revertedWith(
+        'You are not the borrower of this book'
+      );
+    });
+    it('Should not extend the borrow date if the book has been renewed 3 times', async () => {
+      const book3 = { ...book, ISBN: '1234125135656' };
+      await library.addBook(book3);
+      await library.borrowBook(book3.ISBN);
+      for (let i = 0; i < 3; i++) {
+        await library.extendBorrow(book3.ISBN);
+      }
+      expect(library.extendBorrow(book3.ISBN)).to.be.revertedWith(
+        'You have already renewed this book 3 times'
+      );
+    });
+  });
 });
