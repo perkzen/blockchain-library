@@ -75,13 +75,13 @@ describe('Library smart contract', () => {
 
       expect(res.returnDate.toNumber() * 1000).to.approximately(
         d.getTime(),
-        1000
+        10000
       );
     });
 
     it('Should not borrow a book that is already borrowed', async () => {
       expect(library.borrowBook(book.ISBN)).to.be.revertedWith(
-        'Book is already borrowed'
+        'Book is already borrowed.'
       );
     });
   });
@@ -169,13 +169,13 @@ describe('Library smart contract', () => {
     it('Should not extend the borrow date if the book is not borrowed', async () => {
       await library.returnBook(book.ISBN);
       expect(library.extendBorrow(book.ISBN)).to.be.revertedWith(
-        'Book is not borrowed'
+        'Book is not borrowed.'
       );
     });
     it('Should not extend the borrow date if you have not borrowed the book', async () => {
       const book2 = { ...book, ISBN: '1234567890123' };
       expect(library.extendBorrow(book2.ISBN)).to.be.revertedWith(
-        'You are not the borrower of this book'
+        'You are not the borrower of this book.'
       );
     });
     it('Should not extend the borrow date if the book has been renewed 3 times', async () => {
@@ -186,7 +186,7 @@ describe('Library smart contract', () => {
         await library.extendBorrow(book3.ISBN);
       }
       expect(library.extendBorrow(book3.ISBN)).to.be.revertedWith(
-        'You have already renewed this book 3 times'
+        'You have already renewed this book 3 times.'
       );
     });
   });

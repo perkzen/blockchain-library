@@ -41,17 +41,17 @@ contract Library {
     }
 
     modifier isNotBorrowed(string memory _ISBN) {
-        require(borrowedBooks[_ISBN].addr == address(0x0), "This book is already borrowed");
+        require(borrowedBooks[_ISBN].addr == address(0x0), "This book is already borrowed.");
         _;
     }
 
     modifier isBorrowed(string memory _ISBN) {
-        require(borrowedBooks[_ISBN].addr != address(0x0), "This book is not borrowed");
+        require(borrowedBooks[_ISBN].addr != address(0x0), "This book is not borrowed.");
         _;
     }
 
     modifier hasBook(string memory _ISBN) {
-        require(borrowedBooks[_ISBN].addr == msg.sender, "You are not the borrower of this book");
+        require(borrowedBooks[_ISBN].addr == msg.sender, "You are not the borrower of this book.");
         _;
     }
 
@@ -109,7 +109,7 @@ contract Library {
     }
 
     function extendBorrow(string memory _ISBN) public hasBook(_ISBN) isBorrowed(_ISBN) {
-        require(borrowedBooks[_ISBN].numOfRenews < 3, "You have already renewed this book 3 times");
+        require(borrowedBooks[_ISBN].numOfRenews < 3, "You have already renewed this book 3 times.");
         borrowedBooks[_ISBN].returnDate += 3 days;
         borrowedBooks[_ISBN].numOfRenews++;
         emit BookRenewed(_ISBN, msg.sender);
