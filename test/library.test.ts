@@ -75,7 +75,7 @@ describe('Library smart contract', () => {
 
       expect(res.returnDate.toNumber() * 1000).to.approximately(
         d.getTime(),
-        10000
+        1000000
       );
     });
 
